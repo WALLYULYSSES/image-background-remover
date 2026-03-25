@@ -32,39 +32,74 @@ export default function Home() {
 
     setTasks(prev => [...prev, ...newTasks]);
 
-    // Mock processing for each file
+    // Process each file
     newTasks.forEach(task => {
-      mockProcessImage(task.id);
+      processImage(task.id, task.file);
     });
   }, []);
 
-  const mockProcessImage = (taskId: string) => {
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.floor(Math.random() * 20) + 10;
+  const processImage = async (taskId: string, file: File) => {
+    try {
+      // Create FormData to send to our API Route
+      const formData = new FormData();
+      formData.append('image_file', file);
 
-      if (progress >= 100) {
-        clearInterval(interval);
-        setTasks(prev => prev.map(t => {
-          if (t.id === taskId) {
-            // Randomly fail about 10% of the time to show error state
-            const isError = Math.random() > 0.9;
-            return {
-              ...t,
-              status: isError ? 'failed' : 'completed',
-              progress: 100,
-              resultUrl: isError ? undefined : t.previewUrl, // Mock result as original for now
-              error: isError ? '处理失败，请重试' : undefined,
-            };
+      // Simulate some initial progress for user feedback
+      setTasks(prev => prev.map(t =>
+        t.id === taskId ? { ...t, progress: 30 } : t
+      ));
+
+      const response = await fetch('/api/remove-bg', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        // Try to parse JSON error from API route
+        let errorMessage = '处理失败，请重试';
+        try {
+          const errorData = await response.json();
+          if (errorData.error) {
+            errorMessage = errorData.error;
           }
-          return t;
-        }));
-      } else {
-        setTasks(prev => prev.map(t =>
-          t.id === taskId ? { ...t, progress } : t
-        ));
+        } catch (e) {
+          // If response isn't JSON, just use default message
+        }
+
+        throw new Error(errorMessage);
       }
-    }, 500);
+
+      // Read the binary image data
+      const imageBlob = await response.blob();
+      const resultUrl = URL.createObjectURL(imageBlob);
+
+      setTasks(prev => prev.map(t => {
+        if (t.id === taskId) {
+          return {
+            ...t,
+            status: 'completed',
+            progress: 100,
+            resultUrl,
+          };
+        }
+        return t;
+      }));
+
+    } catch (error) {
+      console.error('Error processing image:', error);
+
+      setTasks(prev => prev.map(t => {
+        if (t.id === taskId) {
+          return {
+            ...t,
+            status: 'failed',
+            progress: 100,
+            error: error instanceof Error ? error.message : '处理失败，请重试',
+          };
+        }
+        return t;
+      }));
+    }
   };
 
   const handleRemoveTask = (taskId: string) => {
