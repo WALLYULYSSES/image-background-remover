@@ -1,64 +1,138 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useCallback } from 'react';
+import { UploadZone } from '@/components/custom/UploadZone';
+import { ImageList } from '@/components/custom/ImageList';
+import { Button } from '@/components/ui/button';
+import { Download, Trash2, Scissors } from 'lucide-react';
+
+export type TaskStatus = 'processing' | 'completed' | 'failed';
+
+export interface ImageTask {
+  id: string;
+  file: File;
+  previewUrl: string;
+  status: TaskStatus;
+  progress: number;
+  resultUrl?: string;
+  error?: string;
+}
 
 export default function Home() {
+  const [tasks, setTasks] = useState<ImageTask[]>([]);
+
+  const handleFilesAdded = useCallback((files: File[]) => {
+    const newTasks: ImageTask[] = files.map(file => ({
+      id: Math.random().toString(36).substring(7),
+      file,
+      previewUrl: URL.createObjectURL(file),
+      status: 'processing',
+      progress: 0,
+    }));
+
+    setTasks(prev => [...prev, ...newTasks]);
+
+    // Mock processing for each file
+    newTasks.forEach(task => {
+      mockProcessImage(task.id);
+    });
+  }, []);
+
+  const mockProcessImage = (taskId: string) => {
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.floor(Math.random() * 20) + 10;
+
+      if (progress >= 100) {
+        clearInterval(interval);
+        setTasks(prev => prev.map(t => {
+          if (t.id === taskId) {
+            // Randomly fail about 10% of the time to show error state
+            const isError = Math.random() > 0.9;
+            return {
+              ...t,
+              status: isError ? 'failed' : 'completed',
+              progress: 100,
+              resultUrl: isError ? undefined : t.previewUrl, // Mock result as original for now
+              error: isError ? '处理失败，请重试' : undefined,
+            };
+          }
+          return t;
+        }));
+      } else {
+        setTasks(prev => prev.map(t =>
+          t.id === taskId ? { ...t, progress } : t
+        ));
+      }
+    }, 500);
+  };
+
+  const handleRemoveTask = (taskId: string) => {
+    setTasks(prev => {
+      const task = prev.find(t => t.id === taskId);
+      if (task?.previewUrl) {
+        URL.revokeObjectURL(task.previewUrl);
+      }
+      return prev.filter(t => t.id !== taskId);
+    });
+  };
+
+  const clearAll = () => {
+    setTasks(prev => {
+      prev.forEach(task => {
+        if (task.previewUrl) URL.revokeObjectURL(task.previewUrl);
+      });
+      return [];
+    });
+  };
+
+  const completedCount = tasks.filter(t => t.status === 'completed').length;
+  const hasTasks = tasks.length > 0;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 p-6 md:p-12 lg:p-24">
+      <main className="max-w-4xl mx-auto space-y-12">
+        <div className="text-center space-y-6">
+          <div className="inline-flex items-center justify-center p-3 bg-blue-100 dark:bg-blue-900/30 rounded-2xl mb-4">
+            <Scissors className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+          </div>
+          <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl">
+            Image Background Remover
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">
+            快速、精准的背景移除工具。支持批量处理，一键下载透明背景图片。
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+
+        <UploadZone onFilesAdded={handleFilesAdded} disabled={false} />
+
+        {hasTasks && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between border-b dark:border-slate-800 pb-4">
+              <h2 className="text-2xl font-semibold tracking-tight">
+                处理列表 <span className="text-slate-500 text-lg font-normal">({tasks.length})</span>
+              </h2>
+              <div className="flex gap-3">
+                <Button
+                  variant="ghost"
+                  onClick={clearAll}
+                  className="text-slate-500 hover:text-red-500"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  清空列表
+                </Button>
+                {completedCount > 0 && (
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-md">
+                    <Download className="w-4 h-4 mr-2" />
+                    下载全部 ({completedCount})
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <ImageList tasks={tasks} onRemove={handleRemoveTask} />
+          </div>
+        )}
       </main>
     </div>
   );
