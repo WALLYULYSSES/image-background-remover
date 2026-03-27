@@ -5,6 +5,7 @@ import { UploadZone } from '@/components/custom/UploadZone';
 import { ImageList } from '@/components/custom/ImageList';
 import { Button } from '@/components/ui/button';
 import { Download, Trash2, Scissors } from 'lucide-react';
+import { UserButton } from '@/components/custom/UserButton';
 
 export type TaskStatus = 'processing' | 'completed' | 'failed';
 
@@ -126,6 +127,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 p-6 md:p-12 lg:p-24">
+      <div className="max-w-4xl mx-auto mb-4 flex justify-end">
+        <UserButton />
+      </div>
       <main className="max-w-4xl mx-auto space-y-12">
         <div className="text-center space-y-6">
           <div className="inline-flex items-center justify-center p-3 bg-blue-100 dark:bg-blue-900/30 rounded-2xl mb-4">
