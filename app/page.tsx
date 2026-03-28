@@ -126,10 +126,14 @@ export default function Home() {
   const hasTasks = tasks.length > 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 p-6 md:p-12 lg:p-24">
-      <div className="max-w-4xl mx-auto mb-4 flex justify-end">
-        <UserButton />
-      </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50">
+      <header className="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+        <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
+          <span className="font-semibold text-slate-800 dark:text-slate-200">Image Background Remover</span>
+          <UserButton />
+        </div>
+      </header>
+      <div className="p-6 md:p-12 lg:p-24">
       <main className="max-w-4xl mx-auto space-y-12">
         <div className="text-center space-y-6">
           <div className="inline-flex items-center justify-center p-3 bg-blue-100 dark:bg-blue-900/30 rounded-2xl mb-4">
@@ -173,6 +177,7 @@ export default function Home() {
           </div>
         )}
       </main>
+      </div>
     </div>
   );
 }
