@@ -91,21 +91,21 @@ export function UploadZone({ onFilesAdded, disabled = false }: UploadZoneProps) 
 
         <div className="space-y-2">
           <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
-            点击或拖拽图片到这里
+            Click or drag images here
           </h3>
           <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-            支持 JPG, PNG, WebP 格式，最大 10MB。支持一次上传多张图片进行批量处理。
+            Supports JPG, PNG, WebP up to 10MB. You can upload multiple images at once for batch processing.
           </p>
         </div>
 
         <div className="flex items-center justify-center gap-6 text-xs text-slate-400 dark:text-slate-500 font-medium pt-4">
           <div className="flex items-center gap-1.5">
             <FileImage className="w-4 h-4" />
-            <span>高精度抠图</span>
+            <span>High-quality cutout</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Layers className="w-4 h-4" />
-            <span>支持批量</span>
+            <span>Batch support</span>
           </div>
         </div>
       </div>

@@ -32,7 +32,7 @@ export function UserButton() {
         size: 'medium',
         shape: 'pill',
         text: 'signin_with',
-        locale: 'zh_CN',
+        locale: 'en',
       })
     }
   }, [scriptLoaded])
@@ -61,7 +61,7 @@ export function UserButton() {
           onClick={handleSignOut}
           className="text-xs text-slate-500 hover:text-slate-700 px-2 py-1 rounded border border-slate-200 hover:bg-slate-50 transition-colors"
         >
-          登出
+          Sign out
         </button>
       </div>
     )

@@ -57,7 +57,7 @@ export default function Home() {
 
       if (!response.ok) {
         // Try to parse JSON error from API route
-        let errorMessage = '处理失败，请重试';
+        let errorMessage = 'Processing failed, please try again';
         try {
           const errorData = await response.json();
           if (errorData.error) {
@@ -95,7 +95,7 @@ export default function Home() {
             ...t,
             status: 'failed',
             progress: 100,
-            error: error instanceof Error ? error.message : '处理失败，请重试',
+            error: error instanceof Error ? error.message : 'Processing failed, please try again',
           };
         }
         return t;
@@ -143,7 +143,7 @@ export default function Home() {
             Image Background Remover
           </h1>
           <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">
-            快速、精准的背景移除工具。支持批量处理，一键下载透明背景图片。
+            Fast and accurate background removal. Supports batch processing and one-click download of transparent PNG images.
           </p>
         </div>
 
@@ -153,7 +153,7 @@ export default function Home() {
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center justify-between border-b dark:border-slate-800 pb-4">
               <h2 className="text-2xl font-semibold tracking-tight">
-                处理列表 <span className="text-slate-500 text-lg font-normal">({tasks.length})</span>
+                Queue <span className="text-slate-500 text-lg font-normal">({tasks.length})</span>
               </h2>
               <div className="flex gap-3">
                 <Button
@@ -162,12 +162,12 @@ export default function Home() {
                   className="text-slate-500 hover:text-red-500"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
-                  清空列表
+                  Clear All
                 </Button>
                 {completedCount > 0 && (
                   <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-md">
                     <Download className="w-4 h-4 mr-2" />
-                    下载全部 ({completedCount})
+                    Download All ({completedCount})
                   </Button>
                 )}
               </div>

@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
 
     if (!imageFile) {
       return NextResponse.json(
-        { error: '没有提供图片文件' },
+        { error: 'No image file provided' },
         { status: 400 }
       );
     }
@@ -32,13 +32,13 @@ export async function POST(request: NextRequest) {
       const errorText = await response.text();
       console.error('remove.bg API error:', errorText);
 
-      let errorMessage = '移除背景失败，请重试';
+      let errorMessage = 'Failed to remove background, please try again';
       if (response.status === 402) {
-        errorMessage = 'API 额度已用完，请稍后再试';
+        errorMessage = 'API quota exceeded, please try again later';
       } else if (response.status === 403) {
-        errorMessage = 'API Key 无效，请检查配置';
+        errorMessage = 'Invalid API key';
       } else if (response.status === 400) {
-        errorMessage = '请求无效，图片可能有问题';
+        errorMessage = 'Invalid request, please check your image';
       }
 
       return NextResponse.json(
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error in remove-bg route:', error);
     return NextResponse.json(
-      { error: '服务器内部错误' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

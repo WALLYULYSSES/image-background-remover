@@ -54,7 +54,7 @@ export function ImageCard({ task, onRemove }: ImageCardProps) {
                 <div className="w-full space-y-1">
                   <Progress value={progress} className="h-1.5" />
                   <p className="text-xs font-medium text-center text-slate-600 dark:text-slate-300">
-                    处理中 {progress}%
+                    Processing {progress}%
                   </p>
                 </div>
               </div>
@@ -111,17 +111,17 @@ export function ImageCard({ task, onRemove }: ImageCardProps) {
             {status === 'completed' ? (
               <>
                 <Download className="w-4 h-4 mr-2" />
-                下载结果
+                Download
               </>
             ) : status === 'failed' ? (
               <>
                 <X className="w-4 h-4 mr-2" />
-                无法下载
+                Unavailable
               </>
             ) : (
               <>
                 <ImageIcon className="w-4 h-4 mr-2 text-slate-400" />
-                <span className="text-slate-500">等待处理完成</span>
+                <span className="text-slate-500">Waiting...</span>
               </>
             )}
           </Button>
@@ -136,7 +136,7 @@ function StatusBadge({ status }: { status: TaskStatus }) {
     return (
       <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50 shadow-sm flex items-center gap-1">
         <CheckCircle2 className="w-3 h-3" />
-        完成
+        Done
       </Badge>
     );
   }
@@ -145,7 +145,7 @@ function StatusBadge({ status }: { status: TaskStatus }) {
     return (
       <Badge variant="destructive" className="bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800/50 shadow-sm flex items-center gap-1">
         <AlertCircle className="w-3 h-3" />
-        失败
+        Failed
       </Badge>
     );
   }
@@ -153,7 +153,7 @@ function StatusBadge({ status }: { status: TaskStatus }) {
   return (
     <Badge variant="outline" className="text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 shadow-sm flex items-center gap-1">
       <Loader2 className="w-3 h-3 animate-spin" />
-      处理中
+      Processing
     </Badge>
   );
 }
