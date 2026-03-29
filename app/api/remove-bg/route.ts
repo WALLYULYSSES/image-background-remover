@@ -4,14 +4,26 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
+    const userId = request.headers.get('x-user-id');
+    const db = (process.env as any).DB;
+
+    // If logged in, check credits
+    if (userId) {
+      const user = await db
+        .prepare('SELECT credits FROM users WHERE id = ?')
+        .bind(userId)
+        .first();
+
+      if (!user || user.credits <= 0) {
+        return NextResponse.json({ error: 'No credits remaining' }, { status: 402 });
+      }
+    }
+
     const formData = await request.formData();
     const imageFile = formData.get('image_file') as File | null;
 
     if (!imageFile) {
-      return NextResponse.json(
-        { error: 'No image file provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No image file provided' }, { status: 400 });
     }
 
     // Prepare form data for remove.bg API
@@ -41,16 +53,25 @@ export async function POST(request: NextRequest) {
         errorMessage = 'Invalid request, please check your image';
       }
 
-      return NextResponse.json(
-        { error: errorMessage },
-        { status: response.status }
-      );
+      return NextResponse.json({ error: errorMessage }, { status: response.status });
     }
 
-    // The response is the binary image data
-    const imageBlob = await response.blob();
+    // Deduct credit and log usage for logged-in users
+    if (userId) {
+      await db
+        .prepare('UPDATE users SET credits = credits - 1 WHERE id = ?')
+        .bind(userId)
+        .run();
 
-    // Return the image directly
+      const logId = crypto.randomUUID();
+      await db
+        .prepare('INSERT INTO usage_logs (id, user_id, status) VALUES (?, ?, ?)')
+        .bind(logId, userId, 'success')
+        .run();
+    }
+
+    // Return the image
+    const imageBlob = await response.blob();
     return new NextResponse(imageBlob, {
       headers: {
         'Content-Type': 'image/png',
@@ -60,9 +81,6 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Error in remove-bg route:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
