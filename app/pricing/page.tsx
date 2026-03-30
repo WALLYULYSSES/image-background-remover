@@ -1,100 +1,104 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, ArrowLeft } from 'lucide-react';
+import { Check, ArrowLeft, Zap, Repeat } from 'lucide-react';
 
-const plans = [
+const creditPacks = [
   {
-    name: 'Free',
-    price: '$0',
-    credits: '3',
-    features: [
-      '3 free credits on signup',
-      'High-quality results',
-      'PNG download',
-      'Basic support'
-    ],
-    cta: 'Sign Up Free',
+    name: 'Starter',
+    price: '$9.99',
+    credits: '30',
+    perCredit: '$0.33',
+    features: ['30 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Email support'],
+    cta: 'Buy Now',
     popular: false
   },
   {
+    name: 'Standard',
+    price: '$29.99',
+    credits: '100',
+    perCredit: '$0.30',
+    features: ['100 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing'],
+    cta: 'Buy Now',
+    popular: true
+  },
+  {
+    name: 'Pro',
+    price: '$79.99',
+    credits: '300',
+    perCredit: '$0.27',
+    features: ['300 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing', 'API access'],
+    cta: 'Buy Now',
+    popular: false
+  }
+];
+
+const subscriptions = [
+  {
     name: 'Basic',
-    price: '$4.99',
-    credits: '50',
-    features: [
-      '50 credits',
-      'High-quality results',
-      'PNG download',
-      'Priority support',
-      'No watermark'
-    ],
-    cta: 'Get Started',
+    price: '$19.99',
+    period: '/month',
+    credits: '60',
+    perCredit: '$0.33',
+    features: ['60 credits per month', 'Auto-renewal', 'High-quality results', 'PNG download', 'Priority support', 'Cancel anytime'],
+    cta: 'Subscribe',
     popular: false
   },
   {
     name: 'Pro',
-    price: '$9.99',
-    credits: '120',
-    features: [
-      '120 credits (20% off)',
-      'High-quality results',
-      'PNG download',
-      'Priority support',
-      'No watermark',
-      'Batch processing'
-    ],
-    cta: 'Get Started',
+    price: '$49.99',
+    period: '/month',
+    credits: '180',
+    perCredit: '$0.28',
+    features: ['180 credits per month', 'Auto-renewal', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing', 'Cancel anytime'],
+    cta: 'Subscribe',
     popular: true
   },
   {
     name: 'Business',
-    price: '$19.99',
-    credits: '300',
-    features: [
-      '300 credits (40% off)',
-      'High-quality results',
-      'PNG download',
-      'Priority support',
-      'No watermark',
-      'Batch processing',
-      'API access'
-    ],
-    cta: 'Get Started',
+    price: '$99.99',
+    period: '/month',
+    credits: '400',
+    perCredit: '$0.25',
+    features: ['400 credits per month', 'Auto-renewal', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing', 'API access', 'Cancel anytime'],
+    cta: 'Subscribe',
     popular: false
   }
 ];
 
 export default function PricingPage() {
+  const [planType, setPlanType] = useState<'credits' | 'subscription'>('credits');
   const router = useRouter();
+  const currentPlans = planType === 'credits' ? creditPacks : subscriptions;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 py-12 px-4">
       <div className="max-w-7xl mx-auto">
-        <button
-          onClick={() => router.push('/')}
-          className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mb-8"
-        >
+        <button onClick={() => router.push('/')} className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mb-8">
           <ArrowLeft className="w-4 h-4" />
           Back to Home
         </button>
 
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-            Simple, Transparent Pricing
-          </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400">
-            Choose the plan that fits your needs
-          </p>
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">Simple, Transparent Pricing</h1>
+          <p className="text-lg text-slate-600 dark:text-slate-400 mb-8">Choose between one-time credit packs or monthly subscriptions</p>
+
+          <div className="inline-flex bg-slate-200 dark:bg-slate-800 rounded-lg p-1">
+            <button onClick={() => setPlanType('credits')} className={`flex items-center gap-2 px-6 py-2 rounded-md font-medium transition-colors ${planType === 'credits' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow' : 'text-slate-600 dark:text-slate-400'}`}>
+              <Zap className="w-4 h-4" />
+              Credit Packs
+            </button>
+            <button onClick={() => setPlanType('subscription')} className={`flex items-center gap-2 px-6 py-2 rounded-md font-medium transition-colors ${planType === 'subscription' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow' : 'text-slate-600 dark:text-slate-400'}`}>
+              <Repeat className="w-4 h-4" />
+              Subscriptions
+            </button>
+          </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={`relative bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 ${
-                plan.popular ? 'ring-2 ring-blue-500' : ''
-              }`}
-            >
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+          {currentPlans.map((plan) => (
+            <div key={plan.name} className={`relative bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 ${plan.popular ? 'ring-2 ring-blue-500' : ''}`}>
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
                   Most Popular
@@ -102,43 +106,31 @@ export default function PricingPage() {
               )}
 
               <div className="text-center mb-6">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-                  {plan.name}
-                </h3>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">{plan.name}</h3>
                 <div className="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1">
                   {plan.price}
+                  {'period' in plan && <span className="text-lg text-slate-600 dark:text-slate-400">{plan.period}</span>}
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-400">
-                  {plan.credits} credits
-                </div>
+                <div className="text-sm text-slate-600 dark:text-slate-400">{plan.credits} credits · {plan.perCredit}/credit</div>
               </div>
 
               <ul className="space-y-3 mb-6">
                 {plan.features.map((feature, i) => (
                   <li key={i} className="flex items-start gap-2">
                     <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-slate-600 dark:text-slate-400">
-                      {feature}
-                    </span>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">{feature}</span>
                   </li>
                 ))}
               </ul>
 
-              <button
-                onClick={() => router.push('/')}
-                className={`w-full py-3 rounded-lg font-medium transition-colors ${
-                  plan.popular
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-600'
-                }`}
-              >
+              <button onClick={() => router.push('/')} className={`w-full py-3 rounded-lg font-medium transition-colors ${plan.popular ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
                 {plan.cta}
               </button>
             </div>
           ))}
         </div>
 
-        <div className="mt-12 text-center text-sm text-slate-600 dark:text-slate-400">
+        <div className="text-center text-sm text-slate-600 dark:text-slate-400">
           <p>All plans include high-quality background removal with no watermarks.</p>
           <p className="mt-2">Need more? Contact us for custom enterprise plans.</p>
         </div>
