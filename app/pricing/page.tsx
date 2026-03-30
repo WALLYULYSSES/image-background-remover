@@ -7,28 +7,28 @@ import { Check, ArrowLeft, Zap, Repeat } from 'lucide-react';
 const creditPacks = [
   {
     name: 'Starter',
-    price: '$9.99',
-    credits: '30',
+    price: '$4.99',
+    credits: '15',
     perCredit: '$0.33',
-    features: ['30 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Email support'],
+    features: ['15 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Email support'],
     cta: 'Buy Now',
     popular: false
   },
   {
-    name: 'Standard',
-    price: '$29.99',
-    credits: '100',
+    name: 'Popular',
+    price: '$14.99',
+    credits: '50',
     perCredit: '$0.30',
-    features: ['100 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing'],
+    features: ['50 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing'],
     cta: 'Buy Now',
     popular: true
   },
   {
     name: 'Pro',
-    price: '$79.99',
-    credits: '300',
-    perCredit: '$0.27',
-    features: ['300 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing', 'API access'],
+    price: '$39.99',
+    credits: '140',
+    perCredit: '$0.29',
+    features: ['140 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing', 'API access'],
     cta: 'Buy Now',
     popular: false
   }
@@ -37,31 +37,31 @@ const creditPacks = [
 const subscriptions = [
   {
     name: 'Basic',
-    price: '$19.99',
+    price: '$9.99',
     period: '/month',
-    credits: '60',
-    perCredit: '$0.33',
-    features: ['60 credits per month', 'Auto-renewal', 'High-quality results', 'PNG download', 'Priority support', 'Cancel anytime'],
+    credits: '35',
+    perCredit: '$0.29',
+    features: ['35 credits per month', 'Auto-renewal', 'High-quality results', 'PNG download', 'Priority support', 'Cancel anytime'],
     cta: 'Subscribe',
     popular: false
   },
   {
     name: 'Pro',
-    price: '$49.99',
+    price: '$24.99',
     period: '/month',
-    credits: '180',
-    perCredit: '$0.28',
-    features: ['180 credits per month', 'Auto-renewal', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing', 'Cancel anytime'],
+    credits: '85',
+    perCredit: '$0.29',
+    features: ['85 credits per month', 'Auto-renewal', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing', 'Cancel anytime'],
     cta: 'Subscribe',
     popular: true
   },
   {
     name: 'Business',
-    price: '$99.99',
+    price: '$49.99',
     period: '/month',
-    credits: '400',
-    perCredit: '$0.25',
-    features: ['400 credits per month', 'Auto-renewal', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing', 'API access', 'Cancel anytime'],
+    credits: '175',
+    perCredit: '$0.29',
+    features: ['175 credits per month', 'Auto-renewal', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing', 'API access', 'Cancel anytime'],
     cta: 'Subscribe',
     popular: false
   }
