@@ -17,6 +17,21 @@ export async function POST(request: NextRequest) {
       if (!user || user.credits <= 0) {
         return NextResponse.json({ error: 'No credits remaining' }, { status: 402 });
       }
+    } else {
+      // If not logged in, check IP usage
+      const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+      const today = Math.floor(Date.now() / 86400000); // Days since epoch
+      
+      const ipUsage = await db
+        .prepare('SELECT COUNT(*) as count FROM usage_logs WHERE user_id = ? AND created_at >= ?')
+        .bind(`ip:${ip}`, today * 86400)
+        .first();
+
+      if (ipUsage && ipUsage.count >= 1) {
+        return NextResponse.json({ 
+          error: 'Daily limit reached. Please sign in for more credits.' 
+        }, { status: 429 });
+      }
     }
 
     const formData = await request.formData();
@@ -56,7 +71,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: errorMessage }, { status: response.status });
     }
 
-    // Deduct credit and log usage for logged-in users
+    // Deduct credit and log usage
     if (userId) {
       await db
         .prepare('UPDATE users SET credits = credits - 1 WHERE id = ?')
@@ -67,6 +82,14 @@ export async function POST(request: NextRequest) {
       await db
         .prepare('INSERT INTO usage_logs (id, user_id, status) VALUES (?, ?, ?)')
         .bind(logId, userId, 'success')
+        .run();
+    } else {
+      // Log IP usage for non-logged-in users
+      const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+      const logId = crypto.randomUUID();
+      await db
+        .prepare('INSERT INTO usage_logs (id, user_id, status) VALUES (?, ?, ?)')
+        .bind(logId, `ip:${ip}`, 'success')
         .run();
     }
 
