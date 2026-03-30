@@ -109,7 +109,7 @@ export default function PricingPage() {
                 <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">{plan.name}</h3>
                 <div className="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1">
                   {plan.price}
-                  {'period' in plan && <span className="text-lg text-slate-600 dark:text-slate-400">{plan.period}</span>}
+                  {('period' in plan) ? <span className="text-lg text-slate-600 dark:text-slate-400">{String(plan.period)}</span> : null}
                 </div>
                 <div className="text-sm text-slate-600 dark:text-slate-400">{plan.credits} credits · {plan.perCredit}/credit</div>
               </div>
