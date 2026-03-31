@@ -78,9 +78,7 @@ export default function Home() {
       if (!response.ok) {
         if (response.status === 402) {
           setShowNoCreditsModal(true);
-          setTasks(prev => prev.map(t =>
-            t.id === taskId ? { ...t, status: 'failed', progress: 100, error: 'No credits remaining' } : t
-          ));
+          setTasks(prev => prev.filter(t => t.id !== taskId));
           return;
         }
 
@@ -150,6 +148,12 @@ export default function Home() {
         <div className="w-full px-6 h-14 flex items-center justify-between">
           <span className="font-semibold text-slate-800 dark:text-slate-200">Image Background Remover</span>
           <div className="flex items-center gap-3">
+            <a
+              href="/pricing"
+              className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+            >
+              Pricing
+            </a>
             {user && (
               <span className={`text-sm font-medium px-3 py-1 rounded-full ${
                 credits <= 0
