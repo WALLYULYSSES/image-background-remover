@@ -229,12 +229,12 @@ export default function Home() {
               </button>
             </div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-              {user ? 'Credits Exhausted' : 'Sign In Required'}
+              {user ? 'Not Enough Credits' : 'Sign In to Continue'}
             </h3>
             <p className="text-slate-500 dark:text-slate-400 mb-6">
               {user 
-                ? "You've used all your credits. Upgrade to get more and keep removing backgrounds without limits."
-                : "Please sign in to use background removal. New users get 3 free credits!"}
+                ? "Upgrade to continue removing backgrounds without limits."
+                : "Please sign in to use this feature. New users get 3 free credits!"}
             </p>
             <div className="flex gap-3">
               {user ? (
