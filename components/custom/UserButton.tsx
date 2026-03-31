@@ -77,7 +77,9 @@ export function UserButton({ onUserChange }: UserButtonProps) {
         localStorage.setItem('user_info', JSON.stringify(userInfo))
         setUser(userInfo)
         onUserChange?.(userInfo)
+        window.location.reload()
       } else {
+        console.error('Auth API failed:', res.status)
         // Fallback: decode JWT locally if API fails
         const decoded = JSON.parse(atob(response.credential.split('.')[1]))
         const fallbackUser: UserInfo = {
@@ -87,10 +89,13 @@ export function UserButton({ onUserChange }: UserButtonProps) {
           avatar_url: decoded.picture,
           credits: 0,
         }
+        localStorage.setItem('user_info', JSON.stringify(fallbackUser))
         setUser(fallbackUser)
         onUserChange?.(fallbackUser)
+        window.location.reload()
       }
-    } catch {
+    } catch (error) {
+      console.error('Auth error:', error)
       const decoded = JSON.parse(atob(response.credential.split('.')[1]))
       const fallbackUser: UserInfo = {
         id: decoded.sub,
@@ -99,8 +104,10 @@ export function UserButton({ onUserChange }: UserButtonProps) {
         avatar_url: decoded.picture,
         credits: 0,
       }
+      localStorage.setItem('user_info', JSON.stringify(fallbackUser))
       setUser(fallbackUser)
       onUserChange?.(fallbackUser)
+      window.location.reload()
     }
   }
 
