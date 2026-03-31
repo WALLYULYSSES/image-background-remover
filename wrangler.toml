@@ -1,8 +1,0 @@
-name = "image-background-remover"
-compatibility_date = "2024-01-01"
-pages_build_output_dir = "./dist"
-
-[[d1_databases]]
-binding = "DB"
-database_name = "image-bg-remover-db"
-database_id = "e1112662-642f-4e55-9243-73d833046860"
