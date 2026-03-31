@@ -98,7 +98,7 @@ export default function PricingPage() {
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           {currentPlans.map((plan) => (
-            <div key={plan.name} className={`relative bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 ${plan.popular ? 'ring-2 ring-blue-500' : ''}`}>
+            <div key={plan.name} className={`relative bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 flex flex-col ${plan.popular ? 'ring-2 ring-blue-500' : ''}`}>
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
                   Most Popular
@@ -114,7 +114,7 @@ export default function PricingPage() {
                 <div className="text-sm text-slate-600 dark:text-slate-400">{plan.credits} credits · {plan.perCredit}/credit</div>
               </div>
 
-              <ul className="space-y-3 mb-6">
+              <ul className="space-y-3 mb-6 flex-grow">
                 {plan.features.map((feature, i) => (
                   <li key={i} className="flex items-start gap-2">
                     <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />

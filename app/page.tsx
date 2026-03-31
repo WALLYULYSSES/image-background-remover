@@ -76,7 +76,7 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        if (response.status === 402) {
+        if (response.status === 402 || response.status === 429) {
           setShowNoCreditsModal(true);
           setTasks(prev => prev.filter(t => t.id !== taskId));
           return;
@@ -229,24 +229,37 @@ export default function Home() {
               </button>
             </div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-              Credits Exhausted
+              {user ? 'Credits Exhausted' : 'Sign In Required'}
             </h3>
             <p className="text-slate-500 dark:text-slate-400 mb-6">
-              You've used all your free credits. Upgrade to get more and keep removing backgrounds without limits.
+              {user 
+                ? "You've used all your credits. Upgrade to get more and keep removing backgrounds without limits."
+                : "Please sign in to use background removal. New users get 3 free credits!"}
             </p>
             <div className="flex gap-3">
-              <a
-                href="/pricing"
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center font-medium py-2.5 px-4 rounded-lg transition-colors"
-              >
-                Upgrade Plan
-              </a>
-              <button
-                onClick={() => setShowNoCreditsModal(false)}
-                className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium py-2.5 px-4 rounded-lg transition-colors"
-              >
-                Close
-              </button>
+              {user ? (
+                <>
+                  <a
+                    href="/pricing"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center font-medium py-2.5 px-4 rounded-lg transition-colors"
+                  >
+                    Upgrade Plan
+                  </a>
+                  <button
+                    onClick={() => setShowNoCreditsModal(false)}
+                    className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium py-2.5 px-4 rounded-lg transition-colors"
+                  >
+                    Close
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setShowNoCreditsModal(false)}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
+                >
+                  OK, I'll Sign In
+                </button>
+              )}
             </div>
           </div>
         </div>
