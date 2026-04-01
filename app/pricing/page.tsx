@@ -1,8 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, ArrowLeft, Zap, Repeat } from 'lucide-react';
+
+declare global {
+  interface Window {
+    paypal?: any;
+  }
+}
 
 const creditPacks = [
   {
@@ -69,8 +75,56 @@ const subscriptions = [
 
 export default function PricingPage() {
   const [planType, setPlanType] = useState<'credits' | 'subscription'>('credits');
+  const [loading, setLoading] = useState<string | null>(null);
   const router = useRouter();
   const currentPlans = planType === 'credits' ? creditPacks : subscriptions;
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://www.paypal.com/sdk/js?client-id=AZ8UfPHkpOK1jfUT4O1JRJe5bq84_eDNQzN90n2hN_PDGotH_t7OpKApf3nNT1AZS9aJycf_KB28DJgr&currency=USD';
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const handlePayment = async (price: string, credits: string) => {
+    setLoading(price);
+    const amount = price.replace('$', '');
+    
+    try {
+      const res = await fetch('/api/paypal/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, description: `${credits} credits` })
+      });
+      const { id } = await res.json();
+      
+      if (window.paypal) {
+        window.paypal.Buttons({
+          createOrder: () => id,
+          onApprove: async (data: any) => {
+            const captureRes = await fetch('/api/paypal/capture-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orderID: data.orderID, credits })
+            });
+            const result = await captureRes.json();
+            if (result.success) {
+              alert(`Payment successful! ${credits} credits added.`);
+              router.push('/dashboard');
+            }
+          }
+        }).render('#paypal-button-container-' + price);
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert('Payment failed. Please try again.');
+    } finally {
+      setLoading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 py-12 px-4">
@@ -123,9 +177,14 @@ export default function PricingPage() {
                 ))}
               </ul>
 
-              <button onClick={() => router.push('/')} className={`w-full py-3 rounded-lg font-medium transition-colors ${plan.popular ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
-                {plan.cta}
+              <button 
+                onClick={() => handlePayment(plan.price, plan.credits)}
+                disabled={loading === plan.price}
+                className={`w-full py-3 rounded-lg font-medium transition-colors ${plan.popular ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-600'} disabled:opacity-50`}
+              >
+                {loading === plan.price ? 'Processing...' : plan.cta}
               </button>
+              <div id={`paypal-button-container-${plan.price}`}></div>
             </div>
           ))}
         </div>
