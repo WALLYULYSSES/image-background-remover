@@ -8,27 +8,27 @@ const creditPacks = [
   {
     name: 'Starter',
     price: '$4.99',
-    credits: '15',
-    perCredit: '$0.33',
-    features: ['15 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Email support'],
+    credits: '10',
+    perCredit: '$0.50',
+    features: ['10 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Email support'],
     cta: 'Buy Now',
     popular: false
   },
   {
     name: 'Popular',
     price: '$14.99',
-    credits: '50',
-    perCredit: '$0.30',
-    features: ['50 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing'],
+    credits: '40',
+    perCredit: '$0.37',
+    features: ['40 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing'],
     cta: 'Buy Now',
     popular: true
   },
   {
     name: 'Pro',
     price: '$39.99',
-    credits: '140',
-    perCredit: '$0.29',
-    features: ['140 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing', 'API access'],
+    credits: '100',
+    perCredit: '$0.40',
+    features: ['100 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing', 'API access'],
     cta: 'Buy Now',
     popular: false
   }
@@ -39,29 +39,29 @@ const subscriptions = [
     name: 'Basic',
     price: '$9.99',
     period: '/month',
-    credits: '35',
-    perCredit: '$0.29',
-    features: ['35 credits per month', 'Auto-renewal', 'High-quality results', 'PNG download', 'Priority support', 'Cancel anytime'],
+    credits: '30',
+    perCredit: '$0.33',
+    features: ['30 credits per month', 'Auto-renewal', 'High-quality results', 'PNG download', 'Priority support', 'Cancel anytime'],
     cta: 'Subscribe',
     popular: false
   },
   {
     name: 'Pro',
-    price: '$24.99',
+    price: '$19.99',
     period: '/month',
-    credits: '85',
-    perCredit: '$0.29',
-    features: ['85 credits per month', 'Auto-renewal', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing', 'Cancel anytime'],
+    credits: '60',
+    perCredit: '$0.33',
+    features: ['60 credits per month', 'Auto-renewal', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing', 'Cancel anytime'],
     cta: 'Subscribe',
     popular: true
   },
   {
     name: 'Business',
-    price: '$49.99',
+    price: '$39.99',
     period: '/month',
-    credits: '175',
-    perCredit: '$0.29',
-    features: ['175 credits per month', 'Auto-renewal', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing', 'API access', 'Cancel anytime'],
+    credits: '120',
+    perCredit: '$0.33',
+    features: ['120 credits per month', 'Auto-renewal', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing', 'API access', 'Cancel anytime'],
     cta: 'Subscribe',
     popular: false
   }
