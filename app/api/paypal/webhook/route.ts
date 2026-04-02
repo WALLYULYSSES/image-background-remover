@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const runtime = 'edge';
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await request.json() as { event_type: string; resource: { id: string; amount?: { value: string } } };
     const eventType = body.event_type;
 
     console.log('PayPal Webhook received:', eventType);
 
     switch (eventType) {
       case 'PAYMENT.CAPTURE.COMPLETED':
-        // 支付完成，更新用户积分
         const captureId = body.resource.id;
-        const amount = body.resource.amount.value;
+        const amount = body.resource.amount?.value;
         console.log('Payment completed:', captureId, amount);
         // TODO: 更新 D1 数据库
         break;
