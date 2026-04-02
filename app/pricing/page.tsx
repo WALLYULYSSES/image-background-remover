@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, ArrowLeft, Zap, Repeat } from 'lucide-react';
 
@@ -14,6 +14,7 @@ const creditPacks = [
   {
     name: 'Starter',
     price: '$4.99',
+    amount: '4.99',
     credits: '10',
     perCredit: '$0.50',
     features: ['10 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Email support'],
@@ -23,6 +24,7 @@ const creditPacks = [
   {
     name: 'Popular',
     price: '$14.99',
+    amount: '14.99',
     credits: '40',
     perCredit: '$0.37',
     features: ['40 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing'],
@@ -32,6 +34,7 @@ const creditPacks = [
   {
     name: 'Pro',
     price: '$39.99',
+    amount: '39.99',
     credits: '100',
     perCredit: '$0.40',
     features: ['100 credits (one-time)', 'Never expires', 'High-quality results', 'PNG download', 'Priority support', 'Batch processing', 'API access'],
@@ -44,6 +47,7 @@ const subscriptions = [
   {
     name: 'Basic',
     price: '$9.99',
+    amount: '9.99',
     period: '/month',
     credits: '30',
     perCredit: '$0.33',
@@ -54,6 +58,7 @@ const subscriptions = [
   {
     name: 'Pro',
     price: '$19.99',
+    amount: '19.99',
     period: '/month',
     credits: '60',
     perCredit: '$0.33',
@@ -64,6 +69,7 @@ const subscriptions = [
   {
     name: 'Business',
     price: '$39.99',
+    amount: '39.99',
     period: '/month',
     credits: '120',
     perCredit: '$0.33',
@@ -75,56 +81,108 @@ const subscriptions = [
 
 export default function PricingPage() {
   const [planType, setPlanType] = useState<'credits' | 'subscription'>('credits');
-  const [loading, setLoading] = useState<string | null>(null);
+  const [paypalLoaded, setPaypalLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const scriptRef = useRef<HTMLScriptElement | null>(null);
   const router = useRouter();
   const currentPlans = planType === 'credits' ? creditPacks : subscriptions;
 
+  // Load PayPal SDK
   useEffect(() => {
+    // Remove previous script if any
+    if (scriptRef.current && document.body.contains(scriptRef.current)) {
+      document.body.removeChild(scriptRef.current);
+      scriptRef.current = null;
+    }
+    // Clean up existing paypal button containers
+    setPaypalLoaded(false);
+
     const script = document.createElement('script');
     script.src = 'https://www.paypal.com/sdk/js?client-id=AZ8UfPHkpOK1jfUT4O1JRJe5bq84_eDNQzN90n2hN_PDGotH_t7OpKApf3nNT1AZS9aJycf_KB28DJgr&currency=USD';
     script.async = true;
-    document.body.appendChild(script);
-    return () => {
-      document.body.removeChild(script);
+    script.onload = () => {
+      setPaypalLoaded(true);
     };
-  }, []);
+    script.onerror = () => {
+      setError('Failed to load PayPal SDK. Please refresh the page.');
+    };
+    document.body.appendChild(script);
+    scriptRef.current = script;
 
-  const handlePayment = async (price: string, credits: string) => {
-    setLoading(price);
-    const amount = price.replace('$', '');
-    
-    try {
-      const res = await fetch('/api/paypal/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount, description: `${credits} credits` })
-      });
-      const { id } = await res.json();
-      
-      if (window.paypal) {
-        window.paypal.Buttons({
-          createOrder: () => id,
-          onApprove: async (data: any) => {
-            const captureRes = await fetch('/api/paypal/capture-order', {
+    return () => {
+      if (scriptRef.current && document.body.contains(scriptRef.current)) {
+        document.body.removeChild(scriptRef.current);
+        scriptRef.current = null;
+      }
+    };
+  }, [planType]);
+
+  // Render PayPal buttons after SDK is loaded and DOM is ready
+  useEffect(() => {
+    if (!paypalLoaded || !window.paypal) return;
+
+    currentPlans.forEach((plan) => {
+      const containerId = `paypal-btn-${plan.amount.replace('.', '')}`;
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      // Clear any existing buttons
+      container.innerHTML = '';
+
+      window.paypal.Buttons({
+        style: {
+          layout: 'vertical',
+          color: 'gold',
+          shape: 'rect',
+          label: 'paypal'
+        },
+        createOrder: async () => {
+          try {
+            const res = await fetch('/api/paypal/create-order', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ orderID: data.orderID, credits })
+              body: JSON.stringify({
+                amount: plan.amount,
+                description: `${plan.credits} credits`
+              })
             });
-            const result = await captureRes.json();
-            if (result.success) {
-              alert(`Payment successful! ${credits} credits added.`);
-              router.push('/dashboard');
-            }
+            if (!res.ok) throw new Error('Failed to create order');
+            const data = await res.json();
+            if (!data.id) throw new Error('No order ID returned');
+            return data.id;
+          } catch (err) {
+            console.error('Create order error:', err);
+            setError('Failed to start payment. Please try again.');
+            throw err;
           }
-        }).render('#paypal-button-container-' + price);
-      }
-    } catch (error) {
-      console.error('Payment error:', error);
-      alert('Payment failed. Please try again.');
-    } finally {
-      setLoading(null);
-    }
-  };
+        },
+        onApprove: async (data: any) => {
+          try {
+            const res = await fetch('/api/paypal/capture-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orderID: data.orderID, credits: plan.credits })
+            });
+            const result = await res.json();
+            if (result.success) {
+              router.push('/dashboard?payment=success&credits=' + plan.credits);
+            } else {
+              setError('Payment capture failed. Please contact support.');
+            }
+          } catch (err) {
+            console.error('Capture order error:', err);
+            setError('Payment verification failed. Please contact support.');
+          }
+        },
+        onError: (err: any) => {
+          console.error('PayPal error:', err);
+          setError('Payment failed. Please try again.');
+        },
+        onCancel: () => {
+          // User cancelled, do nothing
+        }
+      }).render(`#${containerId}`);
+    });
+  }, [paypalLoaded, currentPlans, router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 py-12 px-4">
@@ -150,43 +208,53 @@ export default function PricingPage() {
           </div>
         </div>
 
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-center">
+            {error}
+            <button onClick={() => setError(null)} className="ml-2 underline text-sm">Dismiss</button>
+          </div>
+        )}
+
         <div className="grid md:grid-cols-3 gap-6 mb-8">
-          {currentPlans.map((plan) => (
-            <div key={plan.name} className={`relative bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 flex flex-col ${plan.popular ? 'ring-2 ring-blue-500' : ''}`}>
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
-                  Most Popular
-                </div>
-              )}
+          {currentPlans.map((plan) => {
+            const containerId = `paypal-btn-${plan.amount.replace('.', '')}`;
+            return (
+              <div key={plan.name} className={`relative bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 flex flex-col ${plan.popular ? 'ring-2 ring-blue-500' : ''}`}>
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+                    Most Popular
+                  </div>
+                )}
 
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">{plan.name}</h3>
-                <div className="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1">
-                  {plan.price}
-                  {('period' in plan) ? <span className="text-lg text-slate-600 dark:text-slate-400">{String(plan.period)}</span> : null}
+                <div className="text-center mb-6">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">{plan.name}</h3>
+                  <div className="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1">
+                    {plan.price}
+                    {('period' in plan) ? <span className="text-lg text-slate-600 dark:text-slate-400">{String(plan.period)}</span> : null}
+                  </div>
+                  <div className="text-sm text-slate-600 dark:text-slate-400">{plan.credits} credits · {plan.perCredit}/credit</div>
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-400">{plan.credits} credits · {plan.perCredit}/credit</div>
+
+                <ul className="space-y-3 mb-6 flex-grow">
+                  {plan.features.map((feature, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-600 dark:text-slate-400">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* PayPal button container */}
+                <div id={containerId} className="mt-2">
+                  {!paypalLoaded && (
+                    <div className="w-full py-3 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-500 text-center text-sm animate-pulse">
+                      Loading PayPal...
+                    </div>
+                  )}
+                </div>
               </div>
-
-              <ul className="space-y-3 mb-6 flex-grow">
-                {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-slate-600 dark:text-slate-400">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <button 
-                onClick={() => handlePayment(plan.price, plan.credits)}
-                disabled={loading === plan.price}
-                className={`w-full py-3 rounded-lg font-medium transition-colors ${plan.popular ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-600'} disabled:opacity-50`}
-              >
-                {loading === plan.price ? 'Processing...' : plan.cta}
-              </button>
-              <div id={`paypal-button-container-${plan.price}`}></div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="text-center text-sm text-slate-600 dark:text-slate-400">
