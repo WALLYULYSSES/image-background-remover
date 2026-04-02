@@ -29,7 +29,15 @@ async function getPayPalAccessToken(): Promise<string> {
 
 export async function POST(request: NextRequest) {
   try {
-    const { orderID, credits } = await request.json() as { orderID: string; credits: string };
+    const { orderID, credits, userId } = await request.json() as {
+      orderID: string;
+      credits: string;
+      userId: string;
+    };
+
+    if (!userId) {
+      return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
+    }
 
     const mode = process.env.PAYPAL_MODE === 'live' ? 'live' : 'sandbox';
     const baseUrl = mode === 'live'
@@ -56,8 +64,23 @@ export async function POST(request: NextRequest) {
     const capture = await res.json() as { status: string };
 
     if (capture.status === 'COMPLETED') {
-      // TODO: 更新用户积分到 D1 数据库
-      return NextResponse.json({ success: true, credits });
+      // 更新用户积分到 D1 数据库
+      const db = (process.env as any).DB;
+      const creditsToAdd = parseInt(credits, 10);
+
+      await db
+        .prepare('UPDATE users SET credits = credits + ? WHERE id = ?')
+        .bind(creditsToAdd, userId)
+        .run();
+
+      // 记录购买日志
+      const logId = crypto.randomUUID();
+      await db
+        .prepare('INSERT INTO usage_logs (id, user_id, status) VALUES (?, ?, ?)')
+        .bind(logId, userId, `purchase:${credits}`)
+        .run();
+
+      return NextResponse.json({ success: true, credits: creditsToAdd });
     }
 
     return NextResponse.json({ error: 'Payment not completed' }, { status: 400 });

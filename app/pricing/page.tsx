@@ -83,9 +83,23 @@ export default function PricingPage() {
   const [planType, setPlanType] = useState<'credits' | 'subscription'>('credits');
   const [paypalLoaded, setPaypalLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const scriptRef = useRef<HTMLScriptElement | null>(null);
   const router = useRouter();
   const currentPlans = planType === 'credits' ? creditPacks : subscriptions;
+
+  // Load userId from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('user_info');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setUserId(parsed.id || null);
+      } catch {
+        setUserId(null);
+      }
+    }
+  }, []);
 
   // Load PayPal SDK
   useEffect(() => {
@@ -136,6 +150,10 @@ export default function PricingPage() {
           label: 'paypal'
         },
         createOrder: async () => {
+          if (!userId) {
+            setError('Please sign in before purchasing.');
+            throw new Error('Not authenticated');
+          }
           try {
             const res = await fetch('/api/paypal/create-order', {
               method: 'POST',
@@ -156,14 +174,25 @@ export default function PricingPage() {
           }
         },
         onApprove: async (data: any) => {
+          if (!userId) {
+            setError('User session lost. Please sign in and try again.');
+            return;
+          }
           try {
             const res = await fetch('/api/paypal/capture-order', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ orderID: data.orderID, credits: plan.credits })
+              body: JSON.stringify({ orderID: data.orderID, credits: plan.credits, userId })
             });
             const result = await res.json();
             if (result.success) {
+              // Update localStorage credits immediately
+              const stored = localStorage.getItem('user_info');
+              if (stored) {
+                const parsed = JSON.parse(stored);
+                parsed.credits = (parsed.credits || 0) + result.credits;
+                localStorage.setItem('user_info', JSON.stringify(parsed));
+              }
               router.push('/dashboard?payment=success&credits=' + plan.credits);
             } else {
               setError('Payment capture failed. Please contact support.');
@@ -212,6 +241,12 @@ export default function PricingPage() {
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-center">
             {error}
             <button onClick={() => setError(null)} className="ml-2 underline text-sm">Dismiss</button>
+          </div>
+        )}
+
+        {!userId && (
+          <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg text-yellow-800 dark:text-yellow-300 text-center">
+            ⚠️ Please <button onClick={() => router.push('/')} className="underline font-medium">sign in</button> before purchasing.
           </div>
         )}
 
