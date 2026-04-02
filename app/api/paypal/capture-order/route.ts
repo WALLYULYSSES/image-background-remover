@@ -51,17 +51,17 @@ export async function POST(request: NextRequest) {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${accessToken}`,
+        'Prefer': 'return=representation',
       },
-      body: JSON.stringify({}),
     });
 
     if (!res.ok) {
       const err = await res.text();
-      console.error('PayPal capture error:', err);
-      return NextResponse.json({ error: 'Failed to capture payment' }, { status: 500 });
+      console.error('PayPal capture error:', res.status, err);
+      return NextResponse.json({ error: 'Failed to capture payment', detail: err, status: res.status }, { status: 500 });
     }
 
-    const capture = await res.json() as { status: string };
+    const capture = await res.json() as { status: string; id?: string };
 
     if (capture.status === 'COMPLETED') {
       // 更新用户积分到 D1 数据库

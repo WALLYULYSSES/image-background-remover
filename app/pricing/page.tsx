@@ -195,7 +195,7 @@ export default function PricingPage() {
               }
               router.push('/dashboard?payment=success&credits=' + plan.credits);
             } else {
-              setError('Payment capture failed. Please contact support.');
+              setError(`Payment capture failed: ${result.detail || result.error || 'Unknown error'}. Please contact support.`);
             }
           } catch (err) {
             console.error('Capture order error:', err);
