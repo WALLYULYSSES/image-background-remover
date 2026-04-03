@@ -29,7 +29,7 @@ async function getPayPalAccessToken(): Promise<string> {
 
 export async function POST(request: NextRequest) {
   try {
-    const { amount, description } = await request.json() as { amount: string; description: string };
+    const { amount, description, credits, userId } = await request.json() as { amount: string; description: string; credits: number; userId: string };
 
     const mode = process.env.PAYPAL_MODE === 'live' ? 'live' : 'sandbox';
     const baseUrl = mode === 'live'
@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
             value: amount,
           },
           description,
+          custom_id: `credits:${credits}:userId:${userId}`,
         }],
       }),
     });

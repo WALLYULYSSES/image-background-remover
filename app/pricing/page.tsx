@@ -160,7 +160,9 @@ export default function PricingPage() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 amount: plan.amount,
-                description: `${plan.credits} credits`
+                description: `${plan.credits} credits`,
+                credits: parseInt(plan.credits, 10),
+                userId,
               })
             });
             if (!res.ok) throw new Error('Failed to create order');
