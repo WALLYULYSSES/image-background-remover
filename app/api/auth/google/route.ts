@@ -45,9 +45,10 @@ export async function POST(request: NextRequest) {
     } else {
       // Create new user with 3 credits
       const userId = crypto.randomUUID();
+      const now = Math.floor(Date.now() / 1000);
       await db
-        .prepare('INSERT INTO users (id, google_id, email, name, avatar_url, credits) VALUES (?, ?, ?, ?, ?, 3)')
-        .bind(userId, googleId, email, name || null, avatarUrl || null)
+        .prepare('INSERT INTO users (id, google_id, email, name, avatar_url, credits, created_at, updated_at, last_login_at) VALUES (?, ?, ?, ?, ?, 3, ?, ?, ?)')
+        .bind(userId, googleId, email, name || null, avatarUrl || null, now, now, now)
         .run();
 
       user = {
