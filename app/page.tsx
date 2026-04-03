@@ -90,18 +90,20 @@ export default function Home() {
         throw new Error(errorMessage);
       }
 
-      // Deduct credit from local state
+      // Deduct credit from local state — use functional update to avoid stale closure
       if (user?.id) {
-        const newCredits = Math.max(0, credits - 1);
-        setCredits(newCredits);
-        const stored = localStorage.getItem('user_info');
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            parsed.credits = newCredits;
-            localStorage.setItem('user_info', JSON.stringify(parsed));
-          } catch {}
-        }
+        setCredits(prev => {
+          const newCredits = Math.max(0, prev - 1);
+          const stored = localStorage.getItem('user_info');
+          if (stored) {
+            try {
+              const parsed = JSON.parse(stored);
+              parsed.credits = newCredits;
+              localStorage.setItem('user_info', JSON.stringify(parsed));
+            } catch {}
+          }
+          return newCredits;
+        });
       }
 
       const imageBlob = await response.blob();
@@ -120,6 +122,21 @@ export default function Home() {
         } : t
       ));
     }
+  };
+
+  const handleDownloadAll = () => {
+    tasks
+      .filter(t => t.status === 'completed' && t.resultUrl)
+      .forEach((task, index) => {
+        setTimeout(() => {
+          const link = document.createElement('a');
+          link.href = task.resultUrl!;
+          link.download = `removed-bg-${task.file.name.replace(/\.[^/.]+$/, '')}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }, index * 200); // stagger downloads 200ms apart to avoid browser blocking
+      });
   };
 
   const handleRemoveTask = (taskId: string) => {
@@ -200,7 +217,10 @@ export default function Home() {
                     Clear All
                   </Button>
                   {completedCount > 0 && (
-                    <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-md">
+                    <Button
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                      onClick={handleDownloadAll}
+                    >
                       <Download className="w-4 h-4 mr-2" />
                       Download All ({completedCount})
                     </Button>
