@@ -111,6 +111,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Invalid credits value: ${credits}` }, { status: 400 });
     }
 
+    // Ensure user exists before updating
+    const userCheck = await db
+      .prepare('SELECT id FROM users WHERE id = ?')
+      .bind(userId)
+      .first();
+
+    if (!userCheck) {
+      return NextResponse.json({ error: 'User not found in database' }, { status: 404 });
+    }
+
     await db
       .prepare('UPDATE users SET credits = credits + ? WHERE id = ?')
       .bind(creditsToAdd, userId)
