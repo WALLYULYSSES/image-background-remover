@@ -50,8 +50,8 @@ export default function DashboardPage() {
     );
   }
 
-  const creditsMax = 3;
-  const creditsPercent = Math.round((user.credits / creditsMax) * 100);
+  const creditsMax = Math.max(user.credits, 3);
+  const creditsPercent = Math.min(100, Math.round((user.credits / creditsMax) * 100));
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50">
