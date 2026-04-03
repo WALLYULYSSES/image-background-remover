@@ -112,7 +112,7 @@ export default function PricingPage() {
     setPaypalLoaded(false);
 
     const script = document.createElement('script');
-    script.src = 'https://www.paypal.com/sdk/js?client-id=AZ8UfPHkpOK1jfUT4O1JRJe5bq84_eDNQzN90n2hN_PDGotH_t7OpKApf3nNT1AZS9aJycf_KB28DJgr&currency=USD';
+    script.src = 'https://www.paypal.com/sdk/js?client-id=ASDTm3LDzrT-q7g0rTIwhR4N0hLfnvISwckvfjWAqtl5aX0hKjw0LmczFHAJsfr8kZ7tP20L42iIc9dz&currency=USD';
     script.async = true;
     script.onload = () => {
       setPaypalLoaded(true);
